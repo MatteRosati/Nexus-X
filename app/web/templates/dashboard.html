@@ -1,0 +1,271 @@
+<!doctype html>
+
+<html lang="it">
+
+<head>
+  <meta charset="utf-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1"
+  >
+
+  <title>
+    Mead External Attack Surface
+  </title>
+
+  <link
+    rel="stylesheet"
+    href="/static/style.css"
+  >
+</head>
+
+
+<body>
+
+  <main class="container">
+
+    <!-- =====================================================
+         HEADER
+         ===================================================== -->
+
+    <header>
+
+      <div>
+
+        <p class="eyebrow">
+          MEAD INFORMATICA
+        </p>
+
+        <h1>
+          External Attack Surface
+        </h1>
+
+        <p class="muted">
+          Inventario passivo, evidenze e prioritizzazione del rischio.
+        </p>
+
+      </div>
+
+
+      <span
+        id="api-status"
+        class="badge"
+      >
+        API non autenticata
+      </span>
+
+    </header>
+
+
+    <!-- =====================================================
+         AUTENTICAZIONE
+         ===================================================== -->
+
+    <section class="panel auth-panel">
+
+      <label for="api-key">
+        API key applicativa
+      </label>
+
+
+      <div class="row">
+
+        <input
+          id="api-key"
+          type="password"
+          autocomplete="off"
+          placeholder="X-API-Key"
+        >
+
+
+        <button
+          id="save-key"
+          type="button"
+        >
+          Usa chiave
+        </button>
+
+
+        <button
+          id="forget-key"
+          type="button"
+          class="secondary"
+        >
+          Dimentica
+        </button>
+
+      </div>
+
+
+      <p class="hint">
+        La chiave resta nella sessione del browser
+        e non viene salvata nel markup.
+      </p>
+
+    </section>
+
+
+    <!-- =====================================================
+         NUOVA SCANSIONE
+         ===================================================== -->
+
+    <section class="panel">
+
+      <h2>
+        Nuova scansione autorizzata
+      </h2>
+
+
+      <form
+        id="scan-form"
+        class="row"
+      >
+
+        <input
+          id="domain"
+          name="domain"
+          type="text"
+          inputmode="url"
+          placeholder="example.com"
+          required
+          maxlength="253"
+        >
+
+
+        <button type="submit">
+          Accoda scansione
+        </button>
+
+      </form>
+
+
+      <p
+        id="message"
+        class="message"
+        aria-live="polite"
+      ></p>
+
+    </section>
+
+
+    <!-- =====================================================
+         ELENCO SCANSIONI
+         ===================================================== -->
+
+    <section class="panel">
+
+      <div class="section-heading">
+
+        <h2>
+          Scansioni
+        </h2>
+
+
+        <button
+          id="refresh"
+          type="button"
+          class="secondary"
+        >
+          Aggiorna
+        </button>
+
+      </div>
+
+
+      <div class="table-wrap">
+
+        <table>
+
+          <thead>
+
+            <tr>
+              <th>Target</th>
+              <th>Stato</th>
+              <th>Creata</th>
+              <th>Asset</th>
+              <th>Finding</th>
+              <th></th>
+            </tr>
+
+          </thead>
+
+
+          <tbody id="scan-list">
+
+            <tr>
+
+              <td
+                colspan="6"
+                class="muted"
+              >
+                Inserisci l'API key.
+              </td>
+
+            </tr>
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         DETTAGLI SCANSIONE
+         ===================================================== -->
+
+    <section
+      id="details-panel"
+      class="panel hidden"
+    >
+
+      <div class="section-heading">
+
+        <h2 id="details-title">
+          Dettagli
+        </h2>
+
+
+        <button
+          id="report"
+          type="button"
+          class="secondary"
+        >
+          Apri report HTML
+        </button>
+
+      </div>
+
+
+      <div id="collectors"></div>
+
+
+      <h3>
+        Finding
+      </h3>
+
+      <div id="findings"></div>
+
+
+      <h3>
+        Asset
+      </h3>
+
+      <div id="assets"></div>
+
+    </section>
+
+  </main>
+
+
+  <script
+    src="/static/app.js"
+    defer
+  ></script>
+
+</body>
+
+</html>
