@@ -1,27 +1,8 @@
-# Mead External Attack Surface v2 — production baseline
+# Nexus X V.0.1 — production baseline
 
 Applicazione EASM passiva con FastAPI, worker separato, coda persistente PostgreSQL, scope allowlist, autenticazione API, collector crt.sh/DNS/Censys Platform API v3, inventario asset, finding, dashboard e report HTML con auto-escaping.
 
 > **Importante:** questa release è una baseline di produzione, non un'autorizzazione a scansionare terze parti. Configurare `EASM_ALLOWED_DOMAINS` esclusivamente con domini per i quali esiste un'autorizzazione esplicita. Il prodotto usa collector passivi e non esegue port scan attivi.
-
-## Cosa è stato corretto rispetto alla v1
-
-- risultati dei collector realmente persistiti;
-- scan ID e stati `queued`, `running`, `completed`, `partial_failed`, `failed`;
-- worker separato e coda nel database, con recovery dei job interrotti;
-- PostgreSQL in Docker Compose e migrazioni Alembic;
-- autenticazione `X-API-Key`;
-- allowlist obbligatoria dello scope;
-- validazione forte del dominio;
-- collector con timeout, limiti e gestione errori;
-- integrazione Censys Platform API v3 con PAT;
-- report Jinja2 con auto-escaping e CSP;
-- dashboard collegata alle API;
-- container non-root, `read_only`, `cap_drop: ALL`, healthcheck;
-- dipendenze versionate;
-- test per API, scope, collector e regressione XSS.
-
-## Avvio con Docker Compose
 
 1. Copiare la configurazione:
 
