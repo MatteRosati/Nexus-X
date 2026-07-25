@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nexus-X | {{ scan.target }}</title>
+    <title>Nexus-X | unipr.it</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -270,27 +270,27 @@
             <div class="header-brand">
                 <h1>Nexus-X Report</h1>
                 <div class="header-meta">
-                    <span>Target: <strong style="color: #fff;">{{ scan.target }}</strong></span>
+                    <span>Target: <strong style="color: #fff;">unipr.it</strong></span>
                     <span>&bull;</span>
-                    <span>Scan ID: <span style="font-family: monospace;">{{ scan.id }}</span></span>
+                    <span>Scan ID: <span style="font-family: monospace;">7b165fa6-2b04-403b-8ade-ff94310f0504</span></span>
                 </div>
             </div>
             <div>
-                <span class="badge {{ scan.status }}">{{ scan.status }}</span>
+                <span class="badge partial_failed">partial_failed</span>
             </div>
         </header>
 
         <div class="summary-grid">
             <div class="stat-card">
-                <div class="stat-value">{{ scan.summary.get('assets', assets|length) }}</div>
+                <div class="stat-value">5</div>
                 <div class="stat-label">Total Assets</div>
             </div>
             <div class="stat-card">
-                <div class="stat-value">{{ scan.summary.get('findings', findings|length) }}</div>
+                <div class="stat-value">2</div>
                 <div class="stat-label">Total Findings</div>
             </div>
             <div class="stat-card">
-                <div class="stat-value">{{ collectors|length }}</div>
+                <div class="stat-value">7</div>
                 <div class="stat-label">Modules Executed</div>
             </div>
         </div>
@@ -310,27 +310,46 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% for finding in findings %}
+                    
                     <tr>
                         <td>
-                            <div class="sev-pill sev-{{ finding.severity }}">SEV {{ finding.severity }}</div>
+                            <div class="sev-pill sev-2">SEV 2</div>
                         </td>
                         <td>
-                            <strong style="color: #fff; display: block; margin-bottom: 4px;">{{ finding.title }}</strong>
-                            <span style="color: var(--text-secondary); font-size: 0.85rem; text-transform: uppercase;">{{ finding.category }}</span>
+                            <strong style="color: #fff; display: block; margin-bottom: 4px;">DMARC policy is monitoring-only (p=none)</strong>
+                            <span style="color: var(--text-secondary); font-size: 0.85rem; text-transform: uppercase;">email_security</span>
                             <br>
-                            <span class="source-tag">{{ finding.source }}</span>
+                            <span class="source-tag">dns</span>
                         </td>
                         <td>
-                            <pre>{{ finding.evidence | tojson(indent=2) if finding.evidence is mapping else finding.evidence }}</pre>
+                            <pre>{
+  "dmarc_records": [
+    "\"v=DMARC1; p=none; sp=none; adkim=r; aspf=r; fo=1; ri=86400; pct=100; rua=mailto:re+zxb3v8y1ngs@dmarc.postmarkapp.com; ruf=mailto:dmarc_reports@unipr.it\""
+  ],
+  "domain": "unipr.it"
+}</pre>
                         </td>
-                        <td style="color: #d1d5db;">{{ finding.remediation }}</td>
+                        <td style="color: #d1d5db;">After reviewing DMARC reports and aligning legitimate senders, progress toward p=quarantine or p=reject.</td>
                     </tr>
-                    {% else %}
+                    
                     <tr>
-                        <td colspan="4" style="text-align: center; color: var(--text-secondary); padding: 32px;">No findings discovered.</td>
+                        <td>
+                            <div class="sev-pill sev-1">SEV 1</div>
+                        </td>
+                        <td>
+                            <strong style="color: #fff; display: block; margin-bottom: 4px;">CAA record not observed</strong>
+                            <span style="color: var(--text-secondary); font-size: 0.85rem; text-transform: uppercase;">certificate_governance</span>
+                            <br>
+                            <span class="source-tag">dns</span>
+                        </td>
+                        <td>
+                            <pre>{
+  "domain": "unipr.it"
+}</pre>
+                        </td>
+                        <td style="color: #d1d5db;">Consider publishing CAA records to constrain which certificate authorities may issue certificates for the domain.</td>
                     </tr>
-                    {% endfor %}
+                    
                 </tbody>
             </table>
         </div>
@@ -350,28 +369,117 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% for asset in assets %}
+                    
                     <tr>
-                        <td><strong style="color: #cbd5e1;">{{ asset.asset_type }}</strong></td>
-                        <td style="word-break: break-all;">{{ asset.value }}</td>
+                        <td><strong style="color: #cbd5e1;">dns_name</strong></td>
+                        <td style="word-break: break-all;">caio.cce.unipr.it</td>
                         <td>
-                            {% for source in asset.sources %}
-                            <span class="source-tag" style="margin-right: 4px;">{{ source }}</span>
-                            {% endfor %}
+                            
+                            <span class="source-tag" style="margin-right: 4px;">dns</span>
+                            
                         </td>
                         <td>
-                            {% if asset.details %}
-                            <pre>{{ asset.details | tojson(indent=2) }}</pre>
-                            {% else %}
-                            <span style="color: var(--text-secondary); font-style: italic;">No additional details</span>
-                            {% endif %}
+                            
+                            <pre>{
+  "record_type": "NS"
+}</pre>
+                            
                         </td>
                     </tr>
-                    {% else %}
+                    
                     <tr>
-                        <td colspan="4" style="text-align: center; color: var(--text-secondary); padding: 32px;">No assets discovered.</td>
+                        <td><strong style="color: #cbd5e1;">dns_name</strong></td>
+                        <td style="word-break: break-all;">server.fis.unipr.it</td>
+                        <td>
+                            
+                            <span class="source-tag" style="margin-right: 4px;">dns</span>
+                            
+                        </td>
+                        <td>
+                            
+                            <pre>{
+  "record_type": "NS"
+}</pre>
+                            
+                        </td>
                     </tr>
-                    {% endfor %}
+                    
+                    <tr>
+                        <td><strong style="color: #cbd5e1;">domain</strong></td>
+                        <td style="word-break: break-all;">unipr.it</td>
+                        <td>
+                            
+                            <span class="source-tag" style="margin-right: 4px;">dns</span>
+                            
+                        </td>
+                        <td>
+                            
+                            <pre>{
+  "dns_records": {
+    "A": [],
+    "AAAA": [],
+    "CAA": [],
+    "CNAME": [],
+    "DMARC": [
+      "\"v=DMARC1; p=none; sp=none; adkim=r; aspf=r; fo=1; ri=86400; pct=100; rua=mailto:re+zxb3v8y1ngs@dmarc.postmarkapp.com; ruf=mailto:dmarc_reports@unipr.it\""
+    ],
+    "MX": [
+      "0 unipr-it.mail.protection.outlook.com."
+    ],
+    "NS": [
+      "server.fis.unipr.it.",
+      "caio.cce.unipr.it."
+    ],
+    "TXT": [
+      "\"9-yXGhLjHH1T35WyFv3UK60hCeU4CczigjKepAUy__Q\"",
+      "\"Dynatrace-site-verification=b7459172-9a81-4482-ae16-296fe41fed74__c5j6pp6smiqk2a8umiu6h3trd5\"",
+      "\"openai-domain-verification=dv-U7Z7666b7rGbOmNZJbxkArtc\"",
+      "\"google-site-verification=fLJK_I4RKtcn73MEHJqkDSRQK3IyQ7dV2ILONYue-lI\"",
+      "\"HARICA-vhmFUUAi6AATMvOPGo7\"",
+      "\"v=spf1 ip4:160.78.0.0/16 ip4:192.135.11.8 include:_spf.cineca.it include:spf.protection.outlook.com -all\"",
+      "\"facebook-domain-verification=1jy457m1t64l5hou1j6e8ytin8koyw\""
+    ]
+  }
+}</pre>
+                            
+                        </td>
+                    </tr>
+                    
+                    <tr>
+                        <td><strong style="color: #cbd5e1;">mail_host</strong></td>
+                        <td style="word-break: break-all;">unipr-it.mail.protection.outlook.com</td>
+                        <td>
+                            
+                            <span class="source-tag" style="margin-right: 4px;">dns</span>
+                            
+                        </td>
+                        <td>
+                            
+                            <pre>{
+  "mx_record": "0 unipr-it.mail.protection.outlook.com."
+}</pre>
+                            
+                        </td>
+                    </tr>
+                    
+                    <tr>
+                        <td><strong style="color: #cbd5e1;">threat_intel</strong></td>
+                        <td style="word-break: break-all;">CISA Known Exploited Vulnerabilities Catalog</td>
+                        <td>
+                            
+                            <span class="source-tag" style="margin-right: 4px;">cisa_kev</span>
+                            
+                        </td>
+                        <td>
+                            
+                            <pre>{
+  "active_entries": 1653,
+  "feed_url": "https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json"
+}</pre>
+                            
+                        </td>
+                    </tr>
+                    
                 </tbody>
             </table>
         </div>
@@ -391,23 +499,91 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% for run in collectors %}
-                    <tr class="status-{{ run.status }}">
-                        <td><strong style="color: #fff;">{{ run.collector_name }}</strong></td>
+                    
+                    <tr class="status-failed">
+                        <td><strong style="color: #fff;">crtsh</strong></td>
                         <td>
                             <div style="display: flex; align-items: center; text-transform: uppercase; font-size: 0.85rem; font-weight: 600;">
                                 <span class="status-dot"></span>
-                                {{ run.status }}
+                                failed
                             </div>
                         </td>
-                        <td>{{ run.item_count }}</td>
-                        <td style="color: #ef4444; font-family: monospace; font-size: 0.85rem;">{{ run.error or '-' }}</td>
+                        <td>0</td>
+                        <td style="color: #ef4444; font-family: monospace; font-size: 0.85rem;">ReadTimeout: </td>
                     </tr>
-                    {% else %}
-                    <tr>
-                        <td colspan="4" style="text-align: center; color: var(--text-secondary); padding: 32px;">No collectors executed.</td>
+                    
+                    <tr class="status-completed">
+                        <td><strong style="color: #fff;">dns</strong></td>
+                        <td>
+                            <div style="display: flex; align-items: center; text-transform: uppercase; font-size: 0.85rem; font-weight: 600;">
+                                <span class="status-dot"></span>
+                                completed
+                            </div>
+                        </td>
+                        <td>6</td>
+                        <td style="color: #ef4444; font-family: monospace; font-size: 0.85rem;">-</td>
                     </tr>
-                    {% endfor %}
+                    
+                    <tr class="status-completed">
+                        <td><strong style="color: #fff;">http_audit</strong></td>
+                        <td>
+                            <div style="display: flex; align-items: center; text-transform: uppercase; font-size: 0.85rem; font-weight: 600;">
+                                <span class="status-dot"></span>
+                                completed
+                            </div>
+                        </td>
+                        <td>0</td>
+                        <td style="color: #ef4444; font-family: monospace; font-size: 0.85rem;">-</td>
+                    </tr>
+                    
+                    <tr class="status-completed">
+                        <td><strong style="color: #fff;">whois_rdap</strong></td>
+                        <td>
+                            <div style="display: flex; align-items: center; text-transform: uppercase; font-size: 0.85rem; font-weight: 600;">
+                                <span class="status-dot"></span>
+                                completed
+                            </div>
+                        </td>
+                        <td>0</td>
+                        <td style="color: #ef4444; font-family: monospace; font-size: 0.85rem;">-</td>
+                    </tr>
+                    
+                    <tr class="status-completed">
+                        <td><strong style="color: #fff;">cloud_ranges</strong></td>
+                        <td>
+                            <div style="display: flex; align-items: center; text-transform: uppercase; font-size: 0.85rem; font-weight: 600;">
+                                <span class="status-dot"></span>
+                                completed
+                            </div>
+                        </td>
+                        <td>0</td>
+                        <td style="color: #ef4444; font-family: monospace; font-size: 0.85rem;">-</td>
+                    </tr>
+                    
+                    <tr class="status-completed">
+                        <td><strong style="color: #fff;">subdomain_takeover</strong></td>
+                        <td>
+                            <div style="display: flex; align-items: center; text-transform: uppercase; font-size: 0.85rem; font-weight: 600;">
+                                <span class="status-dot"></span>
+                                completed
+                            </div>
+                        </td>
+                        <td>0</td>
+                        <td style="color: #ef4444; font-family: monospace; font-size: 0.85rem;">-</td>
+                    </tr>
+                    
+                    <tr class="status-completed">
+                        <td><strong style="color: #fff;">cisa_kev</strong></td>
+                        <td>
+                            <div style="display: flex; align-items: center; text-transform: uppercase; font-size: 0.85rem; font-weight: 600;">
+                                <span class="status-dot"></span>
+                                completed
+                            </div>
+                        </td>
+                        <td>1</td>
+                        <td style="color: #ef4444; font-family: monospace; font-size: 0.85rem;">-</td>
+                    </tr>
+                    
                 </tbody>
             </table>
         </div>

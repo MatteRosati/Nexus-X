@@ -1,0 +1,741 @@
+<!doctype html>
+<html lang="it">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nexus-X | owasp-juice.shop</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0b0f19;
+            --surface: #111827;
+            --surface-glass: rgba(17, 24, 39, 0.7);
+            --border: #1f2937;
+            --text-primary: #f3f4f6;
+            --text-secondary: #9ca3af;
+            --accent-primary: #3b82f6;
+            --accent-glow: rgba(59, 130, 246, 0.5);
+            
+            --sev-5: #ef4444; /* Critical */
+            --sev-4: #f97316; /* High */
+            --sev-3: #eab308; /* Medium */
+            --sev-2: #3b82f6; /* Low */
+            --sev-1: #6b7280; /* Info */
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            line-height: 1.6;
+            background-image: 
+                radial-gradient(circle at 15% 50%, rgba(59, 130, 246, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 85% 30%, rgba(139, 92, 246, 0.08) 0%, transparent 50%);
+            background-attachment: fixed;
+            padding-bottom: 60px;
+        }
+
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 40px 24px;
+        }
+
+        /* Header Styles */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 24px;
+            margin-bottom: 40px;
+            animation: fadeInDown 0.6s ease-out;
+        }
+
+        .header-brand {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .header-brand h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.02em;
+        }
+
+        .header-meta {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .badge {
+            padding: 4px 10px;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+        }
+
+        .badge.completed { background: rgba(16, 185, 129, 0.15); color: #34d399; border-color: rgba(16, 185, 129, 0.3); }
+        .badge.partial_failed { background: rgba(245, 158, 11, 0.15); color: #fbbf24; border-color: rgba(245, 158, 11, 0.3); }
+
+        /* Dashboard Summary */
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 24px;
+            margin-bottom: 48px;
+            animation: fadeInUp 0.6s ease-out 0.2s both;
+        }
+
+        .stat-card {
+            background: var(--surface-glass);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 0 15px -3px var(--accent-glow);
+            border-color: rgba(59, 130, 246, 0.5);
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            line-height: 1;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* Sections & Tables */
+        .section-header {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: #fff;
+        }
+
+        .table-container {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 48px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+            animation: fadeInUp 0.6s ease-out 0.4s both;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        th {
+            background: rgba(255, 255, 255, 0.02);
+            padding: 16px 20px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-secondary);
+            border-bottom: 1px solid var(--border);
+        }
+
+        td {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.95rem;
+            vertical-align: top;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover td {
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        /* Status & Severities */
+        .status-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        .status-completed .status-dot { background: #34d399; box-shadow: 0 0 8px #34d399; }
+        .status-failed .status-dot { background: #ef4444; box-shadow: 0 0 8px #ef4444; }
+
+        .sev-pill {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+        }
+        .sev-5 { background: rgba(239, 68, 68, 0.15); color: var(--sev-5); border: 1px solid rgba(239, 68, 68, 0.3); }
+        .sev-4 { background: rgba(249, 115, 22, 0.15); color: var(--sev-4); border: 1px solid rgba(249, 115, 22, 0.3); }
+        .sev-3 { background: rgba(234, 179, 8, 0.15); color: var(--sev-3); border: 1px solid rgba(234, 179, 8, 0.3); }
+        .sev-2 { background: rgba(59, 130, 246, 0.15); color: var(--sev-2); border: 1px solid rgba(59, 130, 246, 0.3); }
+        .sev-1 { background: rgba(107, 114, 128, 0.15); color: var(--text-primary); border: 1px solid rgba(107, 114, 128, 0.3); }
+
+        /* Code & Pre */
+        pre {
+            background: #000;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            font-size: 0.85rem;
+            overflow-x: auto;
+            color: #a78bfa;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .source-tag {
+            display: inline-block;
+            margin-top: 6px;
+            font-size: 0.75rem;
+            color: #8b5cf6;
+            background: rgba(139, 92, 246, 0.1);
+            padding: 2px 8px;
+            border-radius: 4px;
+            border: 1px solid rgba(139, 92, 246, 0.2);
+        }
+
+        /* Footer */
+        footer {
+            margin-top: 60px;
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            border-top: 1px solid var(--border);
+            padding-top: 24px;
+        }
+
+        /* Animations */
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-brand">
+                <h1>Nexus-X Report</h1>
+                <div class="header-meta">
+                    <span>Target: <strong style="color: #fff;">owasp-juice.shop</strong></span>
+                    <span>&bull;</span>
+                    <span>Scan ID: <span style="font-family: monospace;">04198bea-dea0-42be-9018-ea01e670609d</span></span>
+                </div>
+            </div>
+            <div>
+                <span class="badge partial_failed">partial_failed</span>
+            </div>
+        </header>
+
+        <div class="summary-grid">
+            <div class="stat-card">
+                <div class="stat-value">8</div>
+                <div class="stat-label">Total Assets</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">6</div>
+                <div class="stat-label">Total Findings</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">7</div>
+                <div class="stat-label">Modules Executed</div>
+            </div>
+        </div>
+
+        <h2 class="section-header">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+            Security Findings
+        </h2>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 80px;">Severity</th>
+                        <th style="width: 30%;">Title / Category</th>
+                        <th style="width: 35%;">Evidence</th>
+                        <th>Remediation</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    
+                    <tr>
+                        <td>
+                            <div class="sev-pill sev-2">SEV 2</div>
+                        </td>
+                        <td>
+                            <strong style="color: #fff; display: block; margin-bottom: 4px;">SPF record not observed</strong>
+                            <span style="color: var(--text-secondary); font-size: 0.85rem; text-transform: uppercase;">email_security</span>
+                            <br>
+                            <span class="source-tag">dns</span>
+                        </td>
+                        <td>
+                            <pre>{
+  "domain": "owasp-juice.shop",
+  "txt_records": [
+    "\"keybase-site-verification=jvXPtfuHPkgsuHIZh9tLROyKLFxiyuRjNyIzLts6dIY\""
+  ]
+}</pre>
+                        </td>
+                        <td style="color: #d1d5db;">Publish and maintain an SPF policy that accurately authorizes the systems permitted to send mail for this domain.</td>
+                    </tr>
+                    
+                    <tr>
+                        <td>
+                            <div class="sev-pill sev-2">SEV 2</div>
+                        </td>
+                        <td>
+                            <strong style="color: #fff; display: block; margin-bottom: 4px;">Web server software version disclosure in HTTP headers</strong>
+                            <span style="color: var(--text-secondary); font-size: 0.85rem; text-transform: uppercase;">information_disclosure</span>
+                            <br>
+                            <span class="source-tag">http_audit</span>
+                        </td>
+                        <td>
+                            <pre>{
+  "disclosures": [
+    "server: GitHub.com",
+    "via: 1.1 varnish"
+  ],
+  "url": "https://juice-shop.github.io/"
+}</pre>
+                        </td>
+                        <td style="color: #d1d5db;">Suppress detailed server and banner headers (e.g. server_tokens off in Nginx, ServerTokens Prod in Apache, expose_php = Off in php.ini).</td>
+                    </tr>
+                    
+                    <tr>
+                        <td>
+                            <div class="sev-pill sev-1">SEV 1</div>
+                        </td>
+                        <td>
+                            <strong style="color: #fff; display: block; margin-bottom: 4px;">CAA record not observed</strong>
+                            <span style="color: var(--text-secondary); font-size: 0.85rem; text-transform: uppercase;">certificate_governance</span>
+                            <br>
+                            <span class="source-tag">dns</span>
+                        </td>
+                        <td>
+                            <pre>{
+  "domain": "owasp-juice.shop"
+}</pre>
+                        </td>
+                        <td style="color: #d1d5db;">Consider publishing CAA records to constrain which certificate authorities may issue certificates for the domain.</td>
+                    </tr>
+                    
+                    <tr>
+                        <td>
+                            <div class="sev-pill sev-1">SEV 1</div>
+                        </td>
+                        <td>
+                            <strong style="color: #fff; display: block; margin-bottom: 4px;">Content Security Policy (CSP) header missing</strong>
+                            <span style="color: var(--text-secondary); font-size: 0.85rem; text-transform: uppercase;">web_security</span>
+                            <br>
+                            <span class="source-tag">http_audit</span>
+                        </td>
+                        <td>
+                            <pre>{
+  "checked_header": "content-security-policy",
+  "domain": "owasp-juice.shop",
+  "url": "https://juice-shop.github.io/"
+}</pre>
+                        </td>
+                        <td style="color: #d1d5db;">Publish a Content-Security-Policy header to mitigate Cross-Site Scripting (XSS) and data injection risks.</td>
+                    </tr>
+                    
+                    <tr>
+                        <td>
+                            <div class="sev-pill sev-1">SEV 1</div>
+                        </td>
+                        <td>
+                            <strong style="color: #fff; display: block; margin-bottom: 4px;">X-Content-Type-Options header missing</strong>
+                            <span style="color: var(--text-secondary); font-size: 0.85rem; text-transform: uppercase;">web_security</span>
+                            <br>
+                            <span class="source-tag">http_audit</span>
+                        </td>
+                        <td>
+                            <pre>{
+  "checked_header": "x-content-type-options",
+  "domain": "owasp-juice.shop",
+  "url": "https://juice-shop.github.io/"
+}</pre>
+                        </td>
+                        <td style="color: #d1d5db;">Set &#39;X-Content-Type-Options: nosniff&#39; to prevent browsers from MIME-sniffing response types.</td>
+                    </tr>
+                    
+                    <tr>
+                        <td>
+                            <div class="sev-pill sev-1">SEV 1</div>
+                        </td>
+                        <td>
+                            <strong style="color: #fff; display: block; margin-bottom: 4px;">X-Frame-Options header missing</strong>
+                            <span style="color: var(--text-secondary); font-size: 0.85rem; text-transform: uppercase;">web_security</span>
+                            <br>
+                            <span class="source-tag">http_audit</span>
+                        </td>
+                        <td>
+                            <pre>{
+  "checked_header": "x-frame-options",
+  "domain": "owasp-juice.shop",
+  "url": "https://juice-shop.github.io/"
+}</pre>
+                        </td>
+                        <td style="color: #d1d5db;">Configure X-Frame-Options (DENY or SAMEORIGIN) to protect against Clickjacking attacks.</td>
+                    </tr>
+                    
+                </tbody>
+            </table>
+        </div>
+
+        <h2 class="section-header">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect><rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect><line x1="6" y1="6" x2="6.01" y2="6"></line><line x1="6" y1="18" x2="6.01" y2="18"></line></svg>
+            Discovered Assets
+        </h2>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 15%;">Type</th>
+                        <th style="width: 35%;">Value</th>
+                        <th style="width: 20%;">Sources</th>
+                        <th>Details</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    
+                    <tr>
+                        <td><strong style="color: #cbd5e1;">dns_name</strong></td>
+                        <td style="word-break: break-all;">docks10.rzone.de</td>
+                        <td>
+                            
+                            <span class="source-tag" style="margin-right: 4px;">dns</span>
+                            
+                        </td>
+                        <td>
+                            
+                            <pre>{
+  "record_type": "NS"
+}</pre>
+                            
+                        </td>
+                    </tr>
+                    
+                    <tr>
+                        <td><strong style="color: #cbd5e1;">dns_name</strong></td>
+                        <td style="word-break: break-all;">shades01.rzone.de</td>
+                        <td>
+                            
+                            <span class="source-tag" style="margin-right: 4px;">dns</span>
+                            
+                        </td>
+                        <td>
+                            
+                            <pre>{
+  "record_type": "NS"
+}</pre>
+                            
+                        </td>
+                    </tr>
+                    
+                    <tr>
+                        <td><strong style="color: #cbd5e1;">domain</strong></td>
+                        <td style="word-break: break-all;">owasp-juice.shop</td>
+                        <td>
+                            
+                            <span class="source-tag" style="margin-right: 4px;">dns</span>
+                            
+                            <span class="source-tag" style="margin-right: 4px;">whois_rdap</span>
+                            
+                        </td>
+                        <td>
+                            
+                            <pre>{
+  "dns_records": {
+    "A": [
+      "81.169.145.156"
+    ],
+    "AAAA": [
+      "2a01:238:20a:202:1156::"
+    ],
+    "CAA": [],
+    "CNAME": [],
+    "DMARC": [
+      "\"v=DMARC1;p=reject;\""
+    ],
+    "MX": [
+      "5 smtpin.rzone.de."
+    ],
+    "NS": [
+      "shades01.rzone.de.",
+      "docks10.rzone.de."
+    ],
+    "TXT": [
+      "\"keybase-site-verification=jvXPtfuHPkgsuHIZh9tLROyKLFxiyuRjNyIzLts6dIY\""
+    ]
+  },
+  "handle": "DO2909101-GMO",
+  "nameservers": [
+    "docks10.rzone.de",
+    "shades01.rzone.de"
+  ],
+  "registrar": "CRONON GmbH",
+  "status": [
+    "active"
+  ]
+}</pre>
+                            
+                        </td>
+                    </tr>
+                    
+                    <tr>
+                        <td><strong style="color: #cbd5e1;">ip</strong></td>
+                        <td style="word-break: break-all;">2a01:238:20a:202:1156::</td>
+                        <td>
+                            
+                            <span class="source-tag" style="margin-right: 4px;">dns</span>
+                            
+                        </td>
+                        <td>
+                            
+                            <pre>{
+  "resolved_from": "owasp-juice.shop"
+}</pre>
+                            
+                        </td>
+                    </tr>
+                    
+                    <tr>
+                        <td><strong style="color: #cbd5e1;">ip</strong></td>
+                        <td style="word-break: break-all;">81.169.145.156</td>
+                        <td>
+                            
+                            <span class="source-tag" style="margin-right: 4px;">dns</span>
+                            
+                        </td>
+                        <td>
+                            
+                            <pre>{
+  "resolved_from": "owasp-juice.shop"
+}</pre>
+                            
+                        </td>
+                    </tr>
+                    
+                    <tr>
+                        <td><strong style="color: #cbd5e1;">mail_host</strong></td>
+                        <td style="word-break: break-all;">smtpin.rzone.de</td>
+                        <td>
+                            
+                            <span class="source-tag" style="margin-right: 4px;">dns</span>
+                            
+                        </td>
+                        <td>
+                            
+                            <pre>{
+  "mx_record": "5 smtpin.rzone.de."
+}</pre>
+                            
+                        </td>
+                    </tr>
+                    
+                    <tr>
+                        <td><strong style="color: #cbd5e1;">threat_intel</strong></td>
+                        <td style="word-break: break-all;">CISA Known Exploited Vulnerabilities Catalog</td>
+                        <td>
+                            
+                            <span class="source-tag" style="margin-right: 4px;">cisa_kev</span>
+                            
+                        </td>
+                        <td>
+                            
+                            <pre>{
+  "active_entries": 1653,
+  "feed_url": "https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json"
+}</pre>
+                            
+                        </td>
+                    </tr>
+                    
+                    <tr>
+                        <td><strong style="color: #cbd5e1;">web_property</strong></td>
+                        <td style="word-break: break-all;">owasp-juice.shop</td>
+                        <td>
+                            
+                            <span class="source-tag" style="margin-right: 4px;">http_audit</span>
+                            
+                        </td>
+                        <td>
+                            
+                            <pre>{
+  "final_url": "https://juice-shop.github.io/",
+  "powered_by": null,
+  "server_header": "GitHub.com",
+  "status_code": 200
+}</pre>
+                            
+                        </td>
+                    </tr>
+                    
+                </tbody>
+            </table>
+        </div>
+
+        <h2 class="section-header">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+            Collector Execution Log
+        </h2>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Collector</th>
+                        <th>Status</th>
+                        <th>Items Found</th>
+                        <th>Error Log</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    
+                    <tr class="status-failed">
+                        <td><strong style="color: #fff;">crtsh</strong></td>
+                        <td>
+                            <div style="display: flex; align-items: center; text-transform: uppercase; font-size: 0.85rem; font-weight: 600;">
+                                <span class="status-dot"></span>
+                                failed
+                            </div>
+                        </td>
+                        <td>0</td>
+                        <td style="color: #ef4444; font-family: monospace; font-size: 0.85rem;">ReadTimeout: </td>
+                    </tr>
+                    
+                    <tr class="status-completed">
+                        <td><strong style="color: #fff;">dns</strong></td>
+                        <td>
+                            <div style="display: flex; align-items: center; text-transform: uppercase; font-size: 0.85rem; font-weight: 600;">
+                                <span class="status-dot"></span>
+                                completed
+                            </div>
+                        </td>
+                        <td>8</td>
+                        <td style="color: #ef4444; font-family: monospace; font-size: 0.85rem;">-</td>
+                    </tr>
+                    
+                    <tr class="status-completed">
+                        <td><strong style="color: #fff;">http_audit</strong></td>
+                        <td>
+                            <div style="display: flex; align-items: center; text-transform: uppercase; font-size: 0.85rem; font-weight: 600;">
+                                <span class="status-dot"></span>
+                                completed
+                            </div>
+                        </td>
+                        <td>5</td>
+                        <td style="color: #ef4444; font-family: monospace; font-size: 0.85rem;">-</td>
+                    </tr>
+                    
+                    <tr class="status-completed">
+                        <td><strong style="color: #fff;">whois_rdap</strong></td>
+                        <td>
+                            <div style="display: flex; align-items: center; text-transform: uppercase; font-size: 0.85rem; font-weight: 600;">
+                                <span class="status-dot"></span>
+                                completed
+                            </div>
+                        </td>
+                        <td>1</td>
+                        <td style="color: #ef4444; font-family: monospace; font-size: 0.85rem;">-</td>
+                    </tr>
+                    
+                    <tr class="status-completed">
+                        <td><strong style="color: #fff;">cloud_ranges</strong></td>
+                        <td>
+                            <div style="display: flex; align-items: center; text-transform: uppercase; font-size: 0.85rem; font-weight: 600;">
+                                <span class="status-dot"></span>
+                                completed
+                            </div>
+                        </td>
+                        <td>0</td>
+                        <td style="color: #ef4444; font-family: monospace; font-size: 0.85rem;">-</td>
+                    </tr>
+                    
+                    <tr class="status-completed">
+                        <td><strong style="color: #fff;">subdomain_takeover</strong></td>
+                        <td>
+                            <div style="display: flex; align-items: center; text-transform: uppercase; font-size: 0.85rem; font-weight: 600;">
+                                <span class="status-dot"></span>
+                                completed
+                            </div>
+                        </td>
+                        <td>0</td>
+                        <td style="color: #ef4444; font-family: monospace; font-size: 0.85rem;">-</td>
+                    </tr>
+                    
+                    <tr class="status-completed">
+                        <td><strong style="color: #fff;">cisa_kev</strong></td>
+                        <td>
+                            <div style="display: flex; align-items: center; text-transform: uppercase; font-size: 0.85rem; font-weight: 600;">
+                                <span class="status-dot"></span>
+                                completed
+                            </div>
+                        </td>
+                        <td>1</td>
+                        <td style="color: #ef4444; font-family: monospace; font-size: 0.85rem;">-</td>
+                    </tr>
+                    
+                </tbody>
+            </table>
+        </div>
+
+        <footer>
+            <p>Generated by Nexus-X EASM Platform &bull; The exposure observations are passively gathered and do not constitute absolute proof of exploitability.</p>
+        </footer>
+    </div>
+</body>
+</html>

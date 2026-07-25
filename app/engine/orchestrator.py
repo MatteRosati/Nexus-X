@@ -5,7 +5,16 @@ from typing import Awaitable, Callable
 
 from sqlalchemy import func, select
 
-from app.collectors import censys, crtsh, dns
+from app.collectors import (
+    censys,
+    cisa_kev,
+    cloud_ranges,
+    crtsh,
+    dns,
+    http_audit,
+    subdomain_takeover,
+    whois_rdap,
+)
 from app.collectors.base import CollectorResult
 from app.core.config import get_settings
 from app.db.models import Asset, CollectorRun, Finding, Scan
@@ -114,7 +123,15 @@ async def _process_scan(scan_id: str) -> None:
         domain = scan.target
 
     settings = get_settings()
-    collectors: list[Collector] = [(crtsh.NAME, crtsh.collect), (dns.NAME, dns.collect)]
+    collectors: list[Collector] = [
+        (crtsh.NAME, crtsh.collect),
+        (dns.NAME, dns.collect),
+        (http_audit.NAME, http_audit.collect),
+        (whois_rdap.NAME, whois_rdap.collect),
+        (cloud_ranges.NAME, cloud_ranges.collect),
+        (subdomain_takeover.NAME, subdomain_takeover.collect),
+        (cisa_kev.NAME, cisa_kev.collect),
+    ]
     if settings.censys_enabled:
         collectors.append((censys.NAME, censys.collect))
 

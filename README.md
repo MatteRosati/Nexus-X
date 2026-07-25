@@ -1,126 +1,139 @@
-# Nexus X V.0.1 — production baseline
+# Nexus-X | External Attack Surface Management (EASM)
 
-Applicazione EASM passiva con FastAPI, worker separato, coda persistente PostgreSQL, scope allowlist, autenticazione API, collector crt.sh/DNS/Censys Platform API v3, inventario asset, finding, dashboard e report HTML con auto-escaping.
+Nexus-X è una piattaforma avanzata e modulare per l'**External Attack Surface Management**. Il suo obiettivo principale è mappare l'esposizione di un'infrastruttura (o di un target specifico) su Internet raccogliendo dati in modo passivo e semi-passivo.
 
-> **Importante:** questa release è una baseline di produzione, non un'autorizzazione a scansionare terze parti. Configurare `EASM_ALLOWED_DOMAINS` esclusivamente con domini per i quali esiste un'autorizzazione esplicita. Il prodotto usa collector passivi e non esegue port scan attivi.
+---
 
-1. Copiare la configurazione:
+## 🎯 1. Scopo della Piattaforma e Informazioni Raccolte
+
+Lo scopo di Nexus-X è fornire ai team di sicurezza offensiva e difensiva una visione chiara degli asset esposti, identificare misconfigurazioni, analizzare la postura di sicurezza e rilevare potenziali vulnerabilità prima che possano essere sfruttate.
+
+### 🔎 Come opera (Approccio OSINT e Stealth)
+Nexus-X utilizza una batteria di **Collector** asincroni. La maggior parte di questi operano in maniera **100% Passiva (Zero-Touch Reconnaissance)** senza interagire in alcun modo con i server del target, affidandosi esclusivamente a OSINT e basi di dati pubbliche.
+
+Le informazioni raccolte includono:
+- **`crtsh` (Passivo):** Certificati SSL/TLS e domini/sottodomini associati estratti dai log di Certificate Transparency.
+- **`whois_rdap` (Passivo):** Informazioni sui registrar, date di registrazione, nameserver e risoluzione base degli indirizzi IP.
+- **`cloud_ranges` (Passivo):** Rilevamento automatico se gli IP del target sono ospitati su infrastrutture cloud pubbliche note (AWS, Google Cloud, Azure).
+- **`dns` (Passivo):** Record A, AAAA, MX e TXT per analizzare la configurazione della posta (es. assenza di record SPF o DMARC).
+- **`subdomain_takeover` (Passivo):** Verifica di record CNAME pendenti verso servizi di terze parti dismessi (es. GitHub Pages, Heroku, S3) vulnerabili a takeover.
+- **`cisa_kev` (Passivo):** Verifica delle stringhe e dei software identificati contro il database federale CISA delle vulnerabilità attivamente sfruttate (Known Exploited Vulnerabilities).
+- **`http_audit` (Semi-Attivo):** Questo modulo effettua una singola richiesta HTTP/HTTPS GET benigna al server web del target per estrarre gli header HTTP (come `Server`, `X-Powered-By`, e l'assenza di `Strict-Transport-Security`). *(Nota: Questa operazione lascerà traccia nei log di accesso del server remoto).*
+- **`censys` (Passivo - Opzionale):** Integrazione con Censys Platform API v3 per una scoperta profonda degli asset globali.
+
+Tutti i dati vengono immagazzinati, deduplicati in un inventario di "Asset" e analizzati per produrre "Security Findings" con relativa gravità e suggerimenti di remediation.
+
+---
+
+## 🚀 2. Comandi di Esecuzione
+
+Nexus-X supporta due modalità di utilizzo parallele: una focalizzata sulla riga di comando per i test rapidi, e un'infrastruttura server per le dashboard e le integrazioni tramite API.
+
+### Configurazione Iniziale (Requisito per entrambi i metodi)
+Assicurati di aver configurato il tuo `.env` (o esportato le variabili d'ambiente) e attivato l'ambiente virtuale:
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+
+export APP_API_KEY="tua_chiave_super_segreta_minimo_32_caratteri"
+export DATABASE_URL="sqlite:///./database/easm.db"
+export EASM_ALLOWED_DOMAINS=""
+export ALLOW_ARBITRARY_TARGETS="true"
+```
+
+### Metodo A: Utilizzo CLI (Modalità Tattica Rapida)
+Ideale per gli analisti che vogliono scansionare un dominio al volo e ottenere un Report HTML estetico salvato direttamente nella cartella corrente, senza far partire alcun server.
 
 ```bash
-cp .env.example .env
+# Esegue una scansione immediata, byapassa le code ed esporta il file HTML
+python cli.py example.com
 ```
 
-2. Generare due segreti diversi:
+### Metodo B: Server Web + Background Worker (Modalità Produzione)
+Ideale per l'utilizzo tramite Dashboard o integrazione API continua. Questa modalità utilizza FastAPI per esporre la dashboard e un processo asincrono per smaltire la coda del database.
 
+1. **Avvia il Web Server (FastAPI):**
 ```bash
-python -c "import secrets; print(secrets.token_urlsafe(48))"
+uvicorn app.main:app --host 127.0.0.1 --port 8000
 ```
-
-Usare un valore per `APP_API_KEY` e un altro per `POSTGRES_PASSWORD`; aggiornare anche la password dentro `DATABASE_URL`.
-
-3. Configurare lo scope autorizzato:
-
-```dotenv
-EASM_ALLOWED_DOMAINS=azienda.it,azienda.com
-ALLOW_ARBITRARY_TARGETS=false
-```
-
-4. Avviare:
-
+2. **Avvia il Background Worker:** (In una nuova finestra del terminale, con lo stesso ambiente)
 ```bash
-docker compose up --build -d
+python -m app.worker
+```
+3. Apri il browser all'indirizzo **`http://127.0.0.1:8000/`**, inserisci la tua `APP_API_KEY` e gestisci i job di scansione tramite l'interfaccia grafica.
+
+---
+
+## 🏗 3. Diagrammi dell'Architettura
+
+L'infrastruttura di Nexus-X è progettata in ottica asincrona e disaccoppiata (Decoupled Architecture), utilizzando PostgreSQL/SQLite come coda di messaggistica transazionale.
+
+```mermaid
+graph TD
+    %% Entità Esterne
+    Utente[Analista / Utente]
+    Target((Target Domain))
+    
+    %% API e Frontend
+    subgraph Web_Layer [FastAPI Web Server]
+        Dashboard[Dashboard UI & Report HTML]
+        API[API Endpoints v1]
+        Dashboard --> API
+    end
+    
+    %% CLI
+    CLI[CLI Wrapper cli.py]
+    
+    %% Database
+    DB[(Database / Queue)]
+    
+    %% Motore EASM
+    subgraph EASM_Engine [Background Worker]
+        Orchestrator[Orchestrator asincrono]
+        
+        %% Collettori
+        C_HTTP[HTTP Audit]
+        C_DNS[DNS & Takeover]
+        C_OSINT[CISA & Cloud Ranges]
+        C_CRTSH[crt.sh]
+        
+        Orchestrator -->|Request| C_HTTP
+        Orchestrator -->|Query| C_DNS
+        Orchestrator -->|Match| C_OSINT
+        Orchestrator -->|Fetch| C_CRTSH
+    end
+    
+    %% Relazioni Utente
+    Utente -->|1. Inserisce target| Dashboard
+    Utente -->|Esegue scansione al volo| CLI
+    
+    %% Flusso Web/Worker (Asincrono)
+    API -->|1. Status: queued| DB
+    DB -.->|2. SELECT FOR UPDATE| Orchestrator
+    Orchestrator -->|3. Salva Asset & Findings| DB
+    API -->|4. Legge dati / Renderizza HTML| DB
+    
+    %% Flusso CLI (Sincrono)
+    CLI -->|Inietta Status: running| DB
+    CLI -->|Chiama direttamente| Orchestrator
+    CLI -->|Genera Report| FileHTML[report_target.html]
+    
+    %% Contatti col bersaglio
+    C_DNS -.->|Risoluzione passiva| Target
+    C_HTTP ==>|GET / HTTP/1.1| Target
+    
+    %% Stili
+    classDef passive fill:#1e293b,stroke:#334155,stroke-width:2px,color:#f8fafc;
+    classDef active fill:#7f1d1d,stroke:#b91c1c,stroke-width:2px,color:#f8fafc;
+    classDef db fill:#0f172a,stroke:#3b82f6,stroke-width:2px,color:#93c5fd;
+    
+    class C_DNS,C_OSINT,C_CRTSH passive;
+    class C_HTTP active;
+    class DB db;
 ```
 
-5. Verificare:
-
-```bash
-curl http://127.0.0.1:8000/health/live
-curl http://127.0.0.1:8000/health/ready
-```
-
-6. Aprire `http://127.0.0.1:8000`, inserire la `APP_API_KEY` nel pannello e avviare una scansione autorizzata.
-
-Per default la porta è pubblicata solo su loopback. Per Internet, mettere un reverse proxy TLS davanti all'applicazione e non esporre direttamente Uvicorn.
-
-## Esempio API
-
-```bash
-curl -X POST http://127.0.0.1:8000/api/v1/scans   -H "X-API-Key: $APP_API_KEY"   -H "Content-Type: application/json"   -d '{"domain":"example.com"}'
-```
-
-```bash
-curl http://127.0.0.1:8000/api/v1/scans   -H "X-API-Key: $APP_API_KEY"
-```
-
-## Censys
-
-La v2 usa la **Censys Platform API v3**. Non usa più `CENSYS_API_ID` e `CENSYS_API_SECRET` della Legacy Search API.
-
-Configurazione minima:
-
-```dotenv
-CENSYS_ENABLED=true
-CENSYS_PAT=censys_...
-CENSYS_ORGANIZATION_ID=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
-CENSYS_MAX_RESULTS=100
-CENSYS_MAX_CONCURRENCY=1
-```
-
-Leggere `docs/CENSYS_CONFIGURATION.md` prima di abilitarla. Il collector usa la ricerca globale passiva e può consumare crediti API.
-
-## Test
-
-```bash
-python -m venv .venv
-. .venv/bin/activate
-pip install -r requirements-dev.txt
-pytest -q
-```
-
-## Migrazioni
-
-Docker Compose esegue automaticamente:
-
-```bash
-alembic upgrade head
-```
-
-Per creare una nuova revisione:
-
-```bash
-alembic revision --autogenerate -m "descrizione"
-alembic upgrade head
-```
-
-## Architettura
-
-```text
-Browser / API client
-        |
-        v
-FastAPI (auth + scope validation)
-        |
-        v
-PostgreSQL queue + inventory
-        |
-        v
-Worker --> crt.sh
-       --> DNS
-       --> Censys Platform API v3 (opzionale)
-        |
-        v
-Asset + Finding + CollectorRun
-        |
-        +--> Dashboard
-        +--> Report HTML sicuro
-```
-
-## Limiti consapevoli
-
-- La baseline è single-tenant: per un servizio MSSP/mROC multi-cliente servono tenant ID, RBAC e segregazione dati.
-- L'allowlist è un controllo amministrativo; non prova automaticamente la proprietà del dominio.
-- I finding Censys indicano esposizione osservata, non dimostrano una vulnerabilità.
-- Prima di scalare i worker, verificare i limiti di concorrenza e crediti del proprio piano Censys.
-- Per alta disponibilità servono backup testati, monitoraggio, reverse proxy TLS/WAF, secret manager e una strategia di upgrade/rollback.
-
-Vedere `docs/PRODUCTION_CHECKLIST.md` e `SECURITY.md`.
+**Flussi di Riferimento del Diagramma:**
+- 🔴 **Frecce spesse rosse (Semi-Attivo):** Indica un contatto diretto e visibile sui log del bersaglio.
+- ⚪ **Frecce tratteggiate bianche (Passivo):** Operazione effettuata verso infrastrutture terze (es. DNS resolver, crt.sh) senza contatto col bersaglio.
+- **Evitamento Race Condition:** La CLI bypassa lo stato `queued` registrando direttamente un job come `running` per evitare che il Worker di background le rubi l'esecuzione (Worker Stealing).

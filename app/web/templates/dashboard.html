@@ -1,267 +1,97 @@
 <!doctype html>
-
 <html lang="it">
-
 <head>
   <meta charset="utf-8">
-
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1"
-  >
-
-  <title>
-    Nexux X
-  </title>
-
-  <link
-    rel="stylesheet"
-    href="/static/style.css"
-  >
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Nexus-X Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
 </head>
-
-
 <body>
-
   <main class="container">
-
-    <!-- =====================================================
-         HEADER
-         ===================================================== -->
-
+    <!-- HEADER -->
     <header>
-
-      <div>
-
-        <p class="eyebrow">
-          Matteo Rosati
-        </p>
-
-        <h1>
-          Nexus X
-        </h1>
-
+      <div class="header-brand">
+        <p class="eyebrow">Matteo Rosati</p>
+        <h1>Nexus-X</h1>
       </div>
-
-
-      <span
-        id="api-status"
-        class="badge"
-      >
-        API non autenticata
-      </span>
-
+      <div>
+        <span id="api-status" class="badge">API non autenticata</span>
+      </div>
     </header>
 
-
-    <!-- =====================================================
-         AUTENTICAZIONE
-         ===================================================== -->
-
+    <!-- AUTENTICAZIONE -->
     <section class="panel auth-panel">
-
-      <label for="api-key">
-        API key
-      </label>
-
-
-      <div class="row">
-
-        <input
-          id="api-key"
-          type="password"
-          autocomplete="off"
-          placeholder="X-API-Key"
-        >
-
-
-        <button
-          id="save-key"
-          type="button"
-        >
-          Use Key
-        </button>
-
-
-        <button
-          id="forget-key"
-          type="button"
-          class="secondary"
-        >
-          Forget
-        </button>
-
-      </div>
-
-
-      <p class="hint">
-        La chiave resta nella sessione del browser
-        e non viene salvata nel markup.
-      </p>
-
-    </section>
-
-
-    <!-- =====================================================
-         NUOVA SCANSIONE
-         ===================================================== -->
-
-    <section class="panel">
-
-      <h2>
-        New Authorized Scan
-      </h2>
-
-
-      <form
-        id="scan-form"
-        class="row"
-      >
-
-        <input
-          id="domain"
-          name="domain"
-          type="text"
-          inputmode="url"
-          placeholder="example.com"
-          required
-          maxlength="253"
-        >
-
-
-        <button type="submit">
-          Accoda scansione
-        </button>
-
-      </form>
-
-
-      <p
-        id="message"
-        class="message"
-        aria-live="polite"
-      ></p>
-
-    </section>
-
-
-    <!-- =====================================================
-         ELENCO SCANSIONI
-         ===================================================== -->
-
-    <section class="panel">
-
       <div class="section-heading">
-
-        <h2>
-          Scansioni
-        </h2>
-
-
-        <button
-          id="refresh"
-          type="button"
-          class="secondary"
-        >
-          Update
-        </button>
-
+        <h2>Autenticazione</h2>
       </div>
+      <label for="api-key" class="hint" style="display: block; margin-bottom: 8px;">Inserisci la tua API Key per accedere al motore EASM.</label>
+      <div class="row">
+        <input id="api-key" type="password" autocomplete="off" placeholder="X-API-Key">
+        <button id="save-key" type="button" class="btn-primary">Usa Chiave</button>
+        <button id="forget-key" type="button" class="btn-secondary">Dimentica</button>
+      </div>
+      <p class="hint" style="margin-top: 12px;">La chiave resta nella sessione del browser e non viene inviata a terze parti.</p>
+    </section>
 
+    <!-- NUOVA SCANSIONE -->
+    <section class="panel">
+      <div class="section-heading">
+        <h2>Nuova Scansione</h2>
+      </div>
+      <form id="scan-form" class="row">
+        <input id="domain" name="domain" type="text" inputmode="url" placeholder="example.com" required maxlength="253">
+        <button type="submit" class="btn-primary">Accoda Scansione</button>
+      </form>
+      <p id="message" class="message" aria-live="polite"></p>
+    </section>
 
+    <!-- ELENCO SCANSIONI -->
+    <section class="panel">
+      <div class="section-heading">
+        <h2>Scansioni Recenti</h2>
+        <button id="refresh" type="button" class="btn-secondary">Aggiorna</button>
+      </div>
       <div class="table-wrap">
-
         <table>
-
           <thead>
-
             <tr>
               <th>Target</th>
               <th>Stato</th>
-              <th>Creata</th>
+              <th>Data Creazione</th>
               <th>Asset</th>
               <th>Finding</th>
-              <th></th>
+              <th>Azioni</th>
             </tr>
-
           </thead>
-
-
           <tbody id="scan-list">
-
             <tr>
-
-              <td
-                colspan="6"
-                class="muted"
-              >
-                Inserisci l'API key.
-              </td>
-
+              <td colspan="6" class="muted" style="text-align: center; padding: 24px;">Inserisci l'API key per visualizzare le scansioni.</td>
             </tr>
-
           </tbody>
-
         </table>
-
       </div>
-
     </section>
 
-
-    <!-- =====================================================
-         DETTAGLI SCANSIONE
-         ===================================================== -->
-
-    <section
-      id="details-panel"
-      class="panel hidden"
-    >
-
+    <!-- DETTAGLI SCANSIONE -->
+    <section id="details-panel" class="panel hidden details-panel">
       <div class="section-heading">
-
-        <h2 id="details-title">
-          Dettagli
-        </h2>
-
-
-        <button
-          id="report"
-          type="button"
-          class="secondary"
-        >
-          Apri report HTML
-        </button>
-
+        <h2 id="details-title">Dettagli</h2>
+        <button id="report" type="button" class="btn-primary">Visualizza Report HTML</button>
       </div>
 
-
-      <div id="collectors"></div>
-
-
-      <h3>
-        Finding
-      </h3>
-
-      <div id="findings"></div>
-
-
-      <h3>
-        Asset
-      </h3>
-
-      <div id="assets"></div>
-
+      <div class="details-content">
+        <div id="collectors" class="detail-section"></div>
+        <div id="findings" class="detail-section"></div>
+        <div id="assets" class="detail-section"></div>
+      </div>
     </section>
-
   </main>
+  
+  <footer>
+    <p>Nexus-X EASM Platform &bull; Made with &hearts; for offensive defense</p>
+  </footer>
 
-
-  <script
-    src="/static/app.js"
-    defer
-  ></script>
-
+  <script src="/static/app.js" defer></script>
 </body>
-
 </html>

@@ -26,3 +26,26 @@ async def test_dns_collector_returns_structured_result(monkeypatch):
     assert result.name == "dns"
     assert any(asset["asset_type"] == "ip" for asset in result.assets)
     assert not any("DMARC record not observed" in finding["title"] for finding in result.findings)
+
+
+@pytest.mark.asyncio
+async def test_http_audit_collector_detects_software_disclosure(httpx_mock):
+    from app.collectors import http_audit
+
+    httpx_mock.add_response(
+        url="https://example.com",
+        headers={
+            "Server": "nginx/1.14.0",
+            "X-Powered-By": "PHP/7.4.3",
+        },
+        status_code=200,
+    )
+
+    result = await http_audit.collect("example.com")
+    assert result.name == "http_audit"
+    assert len(result.assets) == 1
+    assert result.assets[0]["asset_type"] == "web_property"
+    # Should detect missing HSTS/CSP/X-Frame/X-Content-Type + Server disclosure + PHP EOL
+    assert any("version disclosure" in f["title"].lower() for f in result.findings)
+    assert any("php" in f["title"].lower() for f in result.findings)
+
