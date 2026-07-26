@@ -20,6 +20,7 @@ Le informazioni raccolte includono:
 - **`cisa_kev` (Passivo):** Verifica delle stringhe e dei software identificati contro il database federale CISA delle vulnerabilità attivamente sfruttate (Known Exploited Vulnerabilities).
 - **`http_audit` (Semi-Attivo):** Questo modulo effettua una singola richiesta HTTP/HTTPS GET benigna al server web del target per estrarre gli header HTTP (come `Server`, `X-Powered-By`, e l'assenza di `Strict-Transport-Security`). *(Nota: Questa operazione lascerà traccia nei log di accesso del server remoto).*
 - **`censys` (Passivo - Opzionale):** Integrazione con Censys Platform API v3 per una scoperta profonda degli asset globali.
+- **`zoomeye` (Passivo - Opzionale):** Integrazione con ZoomEye API per il rilevamento di porte, servizi esposti e vulnerabilità (supporta la Free Tier).
 
 Tutti i dati vengono immagazzinati, deduplicati in un inventario di "Asset" e analizzati per produrre "Security Findings" con relativa gravità e suggerimenti di remediation.
 
@@ -97,11 +98,13 @@ graph TD
         C_DNS[DNS & Takeover]
         C_OSINT[CISA & Cloud Ranges]
         C_CRTSH[crt.sh]
+        C_ZOOMEYE[ZoomEye / Censys]
         
         Orchestrator -->|Request| C_HTTP
         Orchestrator -->|Query| C_DNS
         Orchestrator -->|Match| C_OSINT
         Orchestrator -->|Fetch| C_CRTSH
+        Orchestrator -->|API| C_ZOOMEYE
     end
     
     %% Relazioni Utente
@@ -128,7 +131,7 @@ graph TD
     classDef active fill:#7f1d1d,stroke:#b91c1c,stroke-width:2px,color:#f8fafc;
     classDef db fill:#0f172a,stroke:#3b82f6,stroke-width:2px,color:#93c5fd;
     
-    class C_DNS,C_OSINT,C_CRTSH passive;
+    class C_DNS,C_OSINT,C_CRTSH,C_ZOOMEYE passive;
     class C_HTTP active;
     class DB db;
 ```

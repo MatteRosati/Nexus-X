@@ -14,6 +14,8 @@ from app.collectors import (
     http_audit,
     subdomain_takeover,
     whois_rdap,
+    zoomeye,
+    leaklookup,
 )
 from app.collectors.base import CollectorResult
 from app.core.config import get_settings
@@ -134,6 +136,10 @@ async def _process_scan(scan_id: str) -> None:
     ]
     if settings.censys_enabled:
         collectors.append((censys.NAME, censys.collect))
+    if settings.zoomeye_enabled:
+        collectors.append((zoomeye.NAME, zoomeye.collect))
+    if settings.leaklookup_enabled:
+        collectors.append((leaklookup.NAME, leaklookup.collect))
 
     logger.info("Starting scan", extra={"scan_id": scan_id, "target": domain})
     results = await asyncio.gather(*[_execute_collector(scan_id, domain, collector) for collector in collectors])

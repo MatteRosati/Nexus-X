@@ -78,5 +78,9 @@ class ScanDetailOut(ScanOut):
 class RuntimeMeta(BaseModel):
     censys_enabled: bool
     censys_configured: bool
+    zoomeye_enabled: bool
+    zoomeye_configured: bool
+    leaklookup_enabled: bool
+    leaklookup_configured: bool
     authorized_scope_count: int
     arbitrary_targets_allowed: bool

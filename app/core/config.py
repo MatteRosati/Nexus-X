@@ -32,6 +32,14 @@ class Settings(BaseSettings):
     censys_max_results: int = Field(default=100, ge=1, le=100)
     censys_max_concurrency: int = Field(default=1, ge=1, le=25)
 
+    zoomeye_enabled: bool = False
+    zoomeye_api_key: SecretStr | None = None
+    zoomeye_max_results: int = Field(default=50, ge=1, le=500)
+    zoomeye_max_concurrency: int = Field(default=1, ge=1, le=5)
+
+    leaklookup_enabled: bool = False
+    leaklookup_api_key: SecretStr | None = None
+
     trusted_hosts: str = "localhost,127.0.0.1"
     cors_origins: str = ""
 
@@ -52,6 +60,10 @@ class Settings(BaseSettings):
             raise ValueError("APP_API_KEY still contains the example placeholder")
         if self.censys_enabled and not self.censys_pat:
             raise ValueError("CENSYS_ENABLED=true requires CENSYS_PAT")
+        if self.zoomeye_enabled and not self.zoomeye_api_key:
+            raise ValueError("ZOOMEYE_ENABLED=true requires ZOOMEYE_API_KEY")
+        if self.leaklookup_enabled and not self.leaklookup_api_key:
+            raise ValueError("LEAKLOOKUP_ENABLED=true requires LEAKLOOKUP_API_KEY")
         return self
 
     @property

@@ -4,93 +4,161 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Nexus-X Dashboard</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-  <main class="container">
-    <!-- HEADER -->
-    <header>
-      <div class="header-brand">
-        <p class="eyebrow">Matteo Rosati</p>
-        <h1>Nexus-X</h1>
+  <div class="layout">
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-logo">NX</div>
+        <div class="brand-text">
+          <h1>Nexus-X</h1>
+          <p class="eyebrow">Matteo Rosati</p>
+        </div>
       </div>
-      <div>
-        <span id="api-status" class="badge">API non autenticata</span>
+      <nav class="nav-menu">
+        <button class="nav-item active" data-target="scans-view">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+          Scansioni
+        </button>
+        <button class="nav-item" data-target="reports-view">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+          Report
+        </button>
+        <button class="nav-item" data-target="auth-view">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+          Impostazioni API
+        </button>
+      </nav>
+      <div class="sidebar-footer">
+        <span id="api-status" class="badge">Non autenticata</span>
       </div>
-    </header>
+    </aside>
 
-    <!-- AUTENTICAZIONE -->
-    <section class="panel auth-panel">
-      <div class="section-heading">
-        <h2>Autenticazione</h2>
-      </div>
-      <label for="api-key" class="hint" style="display: block; margin-bottom: 8px;">Inserisci la tua API Key per accedere al motore EASM.</label>
-      <div class="row">
-        <input id="api-key" type="password" autocomplete="off" placeholder="X-API-Key">
-        <button id="save-key" type="button" class="btn-primary">Usa Chiave</button>
-        <button id="forget-key" type="button" class="btn-secondary">Dimentica</button>
-      </div>
-      <p class="hint" style="margin-top: 12px;">La chiave resta nella sessione del browser e non viene inviata a terze parti.</p>
-    </section>
+    <!-- MAIN CONTENT -->
+    <main class="content">
+      
+      <!-- VISTA: SCANSIONI -->
+      <div id="scans-view" class="view active">
+        <header class="view-header">
+          <h2>Gestione Scansioni</h2>
+          <p class="text-secondary">Avvia e monitora le scansioni EASM sui tuoi target.</p>
+        </header>
 
-    <!-- NUOVA SCANSIONE -->
-    <section class="panel">
-      <div class="section-heading">
-        <h2>Nuova Scansione</h2>
-      </div>
-      <form id="scan-form" class="row">
-        <input id="domain" name="domain" type="text" inputmode="url" placeholder="example.com" required maxlength="253">
-        <button type="submit" class="btn-primary">Accoda Scansione</button>
-      </form>
-      <p id="message" class="message" aria-live="polite"></p>
-    </section>
+        <section class="panel glass">
+          <div class="section-heading">
+            <h3>Nuova Scansione</h3>
+          </div>
+          <form id="scan-form" class="row">
+            <input id="domain" name="domain" type="text" inputmode="url" placeholder="Inserisci il dominio target (es. example.com)" required maxlength="253">
+            <button type="submit" class="btn-primary">Accoda Scansione</button>
+          </form>
+          <p id="message" class="message" aria-live="polite"></p>
+        </section>
 
-    <!-- ELENCO SCANSIONI -->
-    <section class="panel">
-      <div class="section-heading">
-        <h2>Scansioni Recenti</h2>
-        <button id="refresh" type="button" class="btn-secondary">Aggiorna</button>
+        <section class="panel glass">
+          <div class="section-heading">
+            <h3>Scansioni Recenti</h3>
+            <button id="refresh" type="button" class="btn-secondary btn-icon">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+              Aggiorna
+            </button>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Target</th>
+                  <th>Stato</th>
+                  <th>Data Creazione</th>
+                  <th>Asset</th>
+                  <th>Finding</th>
+                  <th>Azioni</th>
+                </tr>
+              </thead>
+              <tbody id="scan-list">
+                <tr>
+                  <td colspan="6" class="muted text-center py-4">Inserisci l'API key per visualizzare le scansioni.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+        
+        <!-- DETTAGLI SCANSIONE -->
+        <section id="details-panel" class="panel glass hidden details-panel">
+          <div class="section-heading">
+            <h3 id="details-title">Dettagli Scansione</h3>
+            <button id="close-details" type="button" class="btn-secondary">Chiudi</button>
+          </div>
+          <div class="details-content">
+            <div id="collectors" class="detail-section"></div>
+            <div id="findings" class="detail-section"></div>
+            <div id="assets" class="detail-section"></div>
+          </div>
+        </section>
       </div>
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Target</th>
-              <th>Stato</th>
-              <th>Data Creazione</th>
-              <th>Asset</th>
-              <th>Finding</th>
-              <th>Azioni</th>
-            </tr>
-          </thead>
-          <tbody id="scan-list">
-            <tr>
-              <td colspan="6" class="muted" style="text-align: center; padding: 24px;">Inserisci l'API key per visualizzare le scansioni.</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </section>
 
-    <!-- DETTAGLI SCANSIONE -->
-    <section id="details-panel" class="panel hidden details-panel">
-      <div class="section-heading">
-        <h2 id="details-title">Dettagli</h2>
-        <button id="report" type="button" class="btn-primary">Visualizza Report HTML</button>
+      <!-- VISTA: REPORT -->
+      <div id="reports-view" class="view hidden">
+        <header class="view-header">
+          <h2>Report EASM</h2>
+          <p class="text-secondary">Visualizza i report generati per le scansioni completate.</p>
+        </header>
+
+        <section class="panel glass">
+          <div class="section-heading">
+            <h3>Report Disponibili</h3>
+            <button id="refresh-reports" type="button" class="btn-secondary btn-icon">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+              Aggiorna
+            </button>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Target</th>
+                  <th>Data Creazione</th>
+                  <th>Totale Asset</th>
+                  <th>Totale Finding</th>
+                  <th>Azioni</th>
+                </tr>
+              </thead>
+              <tbody id="report-list">
+                <tr>
+                  <td colspan="5" class="muted text-center py-4">Inserisci l'API key per visualizzare i report.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
       </div>
 
-      <div class="details-content">
-        <div id="collectors" class="detail-section"></div>
-        <div id="findings" class="detail-section"></div>
-        <div id="assets" class="detail-section"></div>
+      <!-- VISTA: AUTENTICAZIONE -->
+      <div id="auth-view" class="view hidden">
+        <header class="view-header">
+          <h2>Impostazioni API</h2>
+          <p class="text-secondary">Configura l'accesso al motore EASM.</p>
+        </header>
+
+        <section class="panel glass auth-panel">
+          <div class="section-heading">
+            <h3>Autenticazione</h3>
+          </div>
+          <p class="hint mb-4">Inserisci la tua API Key per accedere ai dati. La chiave viene memorizzata in modo sicuro nella sessione del browser.</p>
+          <div class="row">
+            <input id="api-key" type="password" autocomplete="off" placeholder="X-API-Key">
+            <button id="save-key" type="button" class="btn-primary">Salva Chiave</button>
+            <button id="forget-key" type="button" class="btn-secondary">Rimuovi</button>
+          </div>
+        </section>
       </div>
-    </section>
-  </main>
-  
-  <footer>
-    <p>Nexus-X EASM Platform &bull; Made with &hearts; for offensive defense</p>
-  </footer>
+      
+    </main>
+  </div>
 
   <script src="/static/app.js" defer></script>
 </body>

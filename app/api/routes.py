@@ -86,6 +86,10 @@ def runtime_meta(settings: Settings = Depends(get_settings)):
     return RuntimeMeta(
         censys_enabled=settings.censys_enabled,
         censys_configured=bool(settings.censys_pat),
+        zoomeye_enabled=settings.zoomeye_enabled,
+        zoomeye_configured=bool(settings.zoomeye_api_key),
+        leaklookup_enabled=settings.leaklookup_enabled,
+        leaklookup_configured=bool(settings.leaklookup_api_key),
         authorized_scope_count=len(settings.allowed_domains),
         arbitrary_targets_allowed=settings.allow_arbitrary_targets,
     )
