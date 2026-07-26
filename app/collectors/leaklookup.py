@@ -7,12 +7,18 @@ from app.core.config import get_settings
 NAME = "leaklookup"
 SEARCH_URL = "https://leak-lookup.com/api/search"
 
-async def collect(domain: str) -> CollectorResult:
+async def collect(domain: str, options: dict | None = None) -> CollectorResult:
     settings = get_settings()
-    if not settings.leaklookup_enabled or not settings.leaklookup_api_key:
+    opts = options or {}
+    
+    enabled = opts.get("leaklookup_enabled", settings.leaklookup_enabled)
+    api_key = opts.get("leaklookup_api_key")
+    if not api_key and settings.leaklookup_api_key:
+        api_key = settings.leaklookup_api_key.get_secret_value()
+        
+    if not enabled or not api_key:
         return CollectorResult(name=NAME, metadata={"disabled": True})
         
-    api_key = settings.leaklookup_api_key.get_secret_value()
     payload = {
         "key": api_key,
         "type": "domain",

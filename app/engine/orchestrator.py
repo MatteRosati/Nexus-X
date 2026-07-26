@@ -23,7 +23,7 @@ from app.db.models import Asset, CollectorRun, Finding, Scan
 from app.db.session import SessionLocal
 
 logger = logging.getLogger(__name__)
-Collector = tuple[str, Callable[[str], Awaitable[CollectorResult]]]
+Collector = tuple[str, Callable[[str, dict], Awaitable[CollectorResult]]]
 
 
 def _utcnow() -> datetime:
@@ -98,7 +98,7 @@ def _mark_run_failed(run_id: str, message: str) -> None:
             db.commit()
 
 
-async def _execute_collector(scan_id: str, domain: str, collector: Collector) -> tuple[str, bool, str | None]:
+async def _execute_collector(scan_id: str, domain: str, collector: Collector, options: dict) -> tuple[str, bool, str | None]:
     name, function = collector
     with SessionLocal() as db:
         run = CollectorRun(scan_id=scan_id, collector_name=name, status="running", metadata_json={})
@@ -107,7 +107,7 @@ async def _execute_collector(scan_id: str, domain: str, collector: Collector) ->
         run_id = run.id
 
     try:
-        result = await function(domain)
+        result = await function(domain, options)
         _persist_result(scan_id, run_id, result)
         return name, True, None
     except Exception as exc:
@@ -123,6 +123,7 @@ async def _process_scan(scan_id: str) -> None:
         if scan is None:
             return
         domain = scan.target
+        options = scan.options or {}
 
     settings = get_settings()
     collectors: list[Collector] = [
@@ -134,15 +135,15 @@ async def _process_scan(scan_id: str) -> None:
         (subdomain_takeover.NAME, subdomain_takeover.collect),
         (cisa_kev.NAME, cisa_kev.collect),
     ]
-    if settings.censys_enabled:
+    if options.get("censys_enabled", settings.censys_enabled):
         collectors.append((censys.NAME, censys.collect))
-    if settings.zoomeye_enabled:
+    if options.get("zoomeye_enabled", settings.zoomeye_enabled):
         collectors.append((zoomeye.NAME, zoomeye.collect))
-    if settings.leaklookup_enabled:
+    if options.get("leaklookup_enabled", settings.leaklookup_enabled):
         collectors.append((leaklookup.NAME, leaklookup.collect))
 
     logger.info("Starting scan", extra={"scan_id": scan_id, "target": domain})
-    results = await asyncio.gather(*[_execute_collector(scan_id, domain, collector) for collector in collectors])
+    results = await asyncio.gather(*[_execute_collector(scan_id, domain, collector, options) for collector in collectors])
     successes = [item for item in results if item[1]]
     failures = [item for item in results if not item[1]]
 

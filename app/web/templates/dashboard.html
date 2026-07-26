@@ -144,7 +144,7 @@
           <p class="text-secondary">Configura l'accesso al motore EASM.</p>
         </header>
 
-        <section class="panel glass auth-panel">
+        <section class="panel glass auth-panel mb-4">
           <div class="section-heading">
             <h3>Autenticazione</h3>
           </div>
@@ -153,6 +153,50 @@
             <input id="api-key" type="password" autocomplete="off" placeholder="X-API-Key">
             <button id="save-key" type="button" class="btn-primary">Salva Chiave</button>
             <button id="forget-key" type="button" class="btn-secondary">Rimuovi</button>
+          </div>
+        </section>
+
+        <section class="panel glass auth-panel">
+          <div class="section-heading">
+            <h3>Integrazioni (Bring Your Own Key)</h3>
+          </div>
+          <p class="hint mb-4">Abilita e inserisci le API Key di terze parti per usarle nelle prossime scansioni (queste impostazioni hanno priorità su quelle del server e vengono inviate solo durante la scansione).</p>
+          
+          <div class="mb-4">
+             <label style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px; cursor: pointer;">
+               <div class="toggle-switch">
+                 <input type="checkbox" id="zoomeye-enabled">
+                 <span class="toggle-slider"></span>
+               </div>
+               <span class="toggle-label-text">Abilita ZoomEye</span>
+             </label>
+             <input id="zoomeye-key" type="password" placeholder="ZoomEye API-KEY" style="width: 100%;" autocomplete="off">
+          </div>
+          
+          <div class="mb-4">
+             <label style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px; cursor: pointer;">
+               <div class="toggle-switch">
+                 <input type="checkbox" id="leaklookup-enabled">
+                 <span class="toggle-slider"></span>
+               </div>
+               <span class="toggle-label-text">Abilita Leak Lookup</span>
+             </label>
+             <input id="leaklookup-key" type="password" placeholder="Leak Lookup API-KEY" style="width: 100%;" autocomplete="off">
+          </div>
+          
+          <div class="mb-4">
+             <label style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px; cursor: pointer;">
+               <div class="toggle-switch">
+                 <input type="checkbox" id="censys-enabled">
+                 <span class="toggle-slider"></span>
+               </div>
+               <span class="toggle-label-text">Abilita Censys</span>
+             </label>
+             <input id="censys-key" type="password" placeholder="Censys PAT (Personal Access Token)" style="width: 100%;" autocomplete="off">
+          </div>
+          
+          <div class="row mt-4">
+            <button id="save-integrations" type="button" class="btn-primary">Salva Integrazioni</button>
           </div>
         </section>
       </div>

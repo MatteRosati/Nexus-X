@@ -38,9 +38,16 @@ def _escape_query_value(value: str) -> str:
     return value.replace("\\", "\\\\").replace('"', '\\"')
 
 
-async def collect(domain: str) -> CollectorResult:
+async def collect(domain: str, options: dict | None = None) -> CollectorResult:
     settings = get_settings()
-    if not settings.zoomeye_enabled or not settings.zoomeye_api_key:
+    opts = options or {}
+    
+    enabled = opts.get("zoomeye_enabled", settings.zoomeye_enabled)
+    api_key = opts.get("zoomeye_api_key")
+    if not api_key and settings.zoomeye_api_key:
+        api_key = settings.zoomeye_api_key.get_secret_value()
+        
+    if not enabled or not api_key:
         return CollectorResult(name=NAME, metadata={"disabled": True})
 
     escaped = _escape_query_value(domain)
@@ -48,7 +55,7 @@ async def collect(domain: str) -> CollectorResult:
     query = f"site:{escaped}"
     
     headers = {
-        "API-KEY": settings.zoomeye_api_key.get_secret_value(),
+        "API-KEY": api_key,
         "Accept": "application/json",
         "User-Agent": "Mead-EASM/2.0",
     }

@@ -8,6 +8,7 @@ from app.core.domain import DomainValidationError, normalize_domain
 
 class ScanCreate(BaseModel):
     domain: str = Field(min_length=1, max_length=253)
+    options: dict[str, Any] = Field(default_factory=dict)
 
     @field_validator("domain")
     @classmethod

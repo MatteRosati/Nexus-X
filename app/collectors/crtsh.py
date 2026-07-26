@@ -10,7 +10,7 @@ from app.core.domain import is_subdomain_or_equal
 NAME = "crtsh"
 
 
-async def collect(domain: str) -> CollectorResult:
+async def collect(domain: str, options: dict | None = None) -> CollectorResult:
     settings = get_settings()
     timeout = httpx.Timeout(settings.collector_timeout_seconds)
     headers = {"User-Agent": "Mead-EASM/2.0 (+defensive asset inventory)"}

@@ -17,7 +17,7 @@ _CRITICAL_KEV_BASELINE = [
 ]
 
 
-async def collect(domain: str) -> CollectorResult:
+async def collect(domain: str, options: dict | None = None) -> CollectorResult:
     settings = get_settings()
     timeout = httpx.Timeout(min(8.0, settings.collector_timeout_seconds))
     headers = {"User-Agent": "Mead-EASM/2.0 (+defensive asset inventory)"}

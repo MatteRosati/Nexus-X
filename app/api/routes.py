@@ -24,7 +24,7 @@ def create_scan(payload: ScanCreate, db: Session = Depends(get_db), settings: Se
     if queued >= settings.max_queued_scans:
         raise HTTPException(status_code=status.HTTP_429_TOO_MANY_REQUESTS, detail="Scan queue is full")
 
-    scan = Scan(target=payload.domain, status="queued", summary={})
+    scan = Scan(target=payload.domain, status="queued", summary={}, options=payload.options)
     db.add(scan)
     db.commit()
     db.refresh(scan)

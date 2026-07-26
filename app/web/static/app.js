@@ -3,6 +3,14 @@ const saveKey = document.getElementById('save-key');
 const forgetKey = document.getElementById('forget-key');
 const apiStatus = document.getElementById('api-status');
 
+const saveIntegrations = document.getElementById('save-integrations');
+const zoomeyeEnabled = document.getElementById('zoomeye-enabled');
+const zoomeyeKey = document.getElementById('zoomeye-key');
+const leaklookupEnabled = document.getElementById('leaklookup-enabled');
+const leaklookupKey = document.getElementById('leaklookup-key');
+const censysEnabled = document.getElementById('censys-enabled');
+const censysKey = document.getElementById('censys-key');
+
 const scanForm = document.getElementById('scan-form');
 const domainInput = document.getElementById('domain');
 const message = document.getElementById('message');
@@ -251,6 +259,33 @@ forgetKey.addEventListener('click', () => {
 });
 
 /*
+ * Salvataggio Integrazioni
+ */
+saveIntegrations.addEventListener('click', () => {
+  sessionStorage.setItem('easm_zoomeye_enabled', zoomeyeEnabled.checked);
+  sessionStorage.setItem('easm_zoomeye_key', zoomeyeKey.value);
+  sessionStorage.setItem('easm_leaklookup_enabled', leaklookupEnabled.checked);
+  sessionStorage.setItem('easm_leaklookup_key', leaklookupKey.value);
+  sessionStorage.setItem('easm_censys_enabled', censysEnabled.checked);
+  sessionStorage.setItem('easm_censys_key', censysKey.value);
+  alert('Integrazioni BYOK salvate per la sessione corrente!');
+});
+
+// Load integrations on boot
+if (sessionStorage.getItem('easm_zoomeye_enabled') !== null) {
+  zoomeyeEnabled.checked = sessionStorage.getItem('easm_zoomeye_enabled') === 'true';
+  zoomeyeKey.value = sessionStorage.getItem('easm_zoomeye_key') || '';
+}
+if (sessionStorage.getItem('easm_leaklookup_enabled') !== null) {
+  leaklookupEnabled.checked = sessionStorage.getItem('easm_leaklookup_enabled') === 'true';
+  leaklookupKey.value = sessionStorage.getItem('easm_leaklookup_key') || '';
+}
+if (sessionStorage.getItem('easm_censys_enabled') !== null) {
+  censysEnabled.checked = sessionStorage.getItem('easm_censys_enabled') === 'true';
+  censysKey.value = sessionStorage.getItem('easm_censys_key') || '';
+}
+
+/*
  * Aggiornamento manuale
  */
 refreshButton.addEventListener('click', loadScans);
@@ -263,9 +298,23 @@ scanForm.addEventListener('submit', async event => {
   event.preventDefault();
   setMessage('');
   try {
+    const options = {};
+    if (sessionStorage.getItem('easm_zoomeye_enabled') !== null) {
+        options.zoomeye_enabled = sessionStorage.getItem('easm_zoomeye_enabled') === 'true';
+        options.zoomeye_api_key = sessionStorage.getItem('easm_zoomeye_key') || '';
+    }
+    if (sessionStorage.getItem('easm_leaklookup_enabled') !== null) {
+        options.leaklookup_enabled = sessionStorage.getItem('easm_leaklookup_enabled') === 'true';
+        options.leaklookup_api_key = sessionStorage.getItem('easm_leaklookup_key') || '';
+    }
+    if (sessionStorage.getItem('easm_censys_enabled') !== null) {
+        options.censys_enabled = sessionStorage.getItem('easm_censys_enabled') === 'true';
+        options.censys_api_key = sessionStorage.getItem('easm_censys_key') || '';
+    }
+
     const response = await api('/api/v1/scans', {
       method: 'POST',
-      body: JSON.stringify({ domain: domainInput.value })
+      body: JSON.stringify({ domain: domainInput.value, options })
     });
     const scan = await response.json();
     setMessage(`Scansione per ${scan.target} accodata con successo.`, 'ok');

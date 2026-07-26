@@ -13,7 +13,7 @@ CLOUDFLARE_IPS_URL = "https://www.cloudflare.com/ips-v4"
 AWS_IP_RANGES_URL = "https://ip-ranges.amazonaws.com/ip-ranges.json"
 
 
-async def collect(domain: str) -> CollectorResult:
+async def collect(domain: str, options: dict | None = None) -> CollectorResult:
     settings = get_settings()
     timeout = httpx.Timeout(min(8.0, settings.collector_timeout_seconds))
     headers = {"User-Agent": "Mead-EASM/2.0 (+defensive asset inventory)"}

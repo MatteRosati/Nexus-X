@@ -29,6 +29,7 @@ class Scan(Base):
     completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     error: Mapped[str | None] = mapped_column(Text)
     summary: Mapped[dict] = mapped_column(JSON, nullable=False, default=dict)
+    options: Mapped[dict] = mapped_column(JSON, nullable=False, default=dict, server_default='{}')
 
     assets: Mapped[list[Asset]] = relationship(back_populates="scan", cascade="all, delete-orphan")
     findings: Mapped[list[Finding]] = relationship(back_populates="scan", cascade="all, delete-orphan")

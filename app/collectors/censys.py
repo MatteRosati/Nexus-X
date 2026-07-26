@@ -82,9 +82,16 @@ def _collect_ports(hit: dict[str, Any]) -> list[dict[str, Any]]:
     return services
 
 
-async def collect(domain: str) -> CollectorResult:
+async def collect(domain: str, options: dict | None = None) -> CollectorResult:
     settings = get_settings()
-    if not settings.censys_enabled or not settings.censys_pat:
+    opts = options or {}
+    
+    enabled = opts.get("censys_enabled", settings.censys_enabled)
+    api_key = opts.get("censys_api_key")
+    if not api_key and settings.censys_pat:
+        api_key = settings.censys_pat.get_secret_value()
+        
+    if not enabled or not api_key:
         return CollectorResult(name=NAME, metadata={"disabled": True})
 
     escaped = _escape_query_value(domain)
@@ -108,7 +115,7 @@ async def collect(domain: str) -> CollectorResult:
     if settings.censys_organization_id:
         params["organization_id"] = settings.censys_organization_id
     headers = {
-        "Authorization": f"Bearer {settings.censys_pat.get_secret_value()}",
+        "Authorization": f"Bearer {api_key}",
         "Accept": "application/json",
         "User-Agent": "Mead-EASM/2.0",
     }

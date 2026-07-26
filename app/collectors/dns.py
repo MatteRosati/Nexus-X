@@ -31,7 +31,7 @@ async def _resolve(resolver: dns.asyncresolver.Resolver, name: str, record_type:
         return [], exc.__class__.__name__.lower()
 
 
-async def collect(domain: str) -> CollectorResult:
+async def collect(domain: str, options: dict | None = None) -> CollectorResult:
     settings = get_settings()
     resolver = dns.asyncresolver.Resolver()
     resolver.timeout = min(5.0, settings.collector_timeout_seconds)
